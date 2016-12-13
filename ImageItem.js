@@ -1,36 +1,32 @@
-import React, {Component} from 'react';
+import React, {Component} from 'react'
 import {
   Image,
   StyleSheet,
   Dimensions,
-  TouchableOpacity,
-} from 'react-native';
+  TouchableOpacity
+} from 'react-native'
 
 class ImageItem extends Component {
-  constructor(props){
-    super(props)
-  }
 
-  componentWillMount() {
-    var {width} = Dimensions.get('window');
-    var {imageMargin, imagesPerRow, containerWidth} = this.props;
-
-    if(typeof containerWidth != "undefined") {
-      width = containerWidth;
+  componentWillMount () {
+    var {width} = Dimensions.get('window')
+    var {imageMargin, imagesPerRow, containerWidth} = this.props
+    if (typeof containerWidth !== 'undefined') {
+      width = containerWidth
     }
-    this._imageSize = (width - (imagesPerRow + 1) * imageMargin) / imagesPerRow;
+    this._imageSize = (width - (imagesPerRow - 1) * imageMargin) / imagesPerRow
   }
 
-  render() {
-    var {item, selected, selectedMarker, imageMargin} = this.props;
+  render () {
+    var {item, selected, selectedMarker, imageMargin} = this.props
 
-    var marker = selectedMarker ? selectedMarker :
-        <Image
-          style={[styles.marker, {width: 25, height: 25}]}
-          source={require('./circle-check.png')}
-          />;
+    var marker = selectedMarker ||
+    <Image
+      style={[styles.marker, {width: 25, height: 25}]}
+      source={require('./img/ic_radio_checked_black_24dp.png')}
+      />
 
-    var image = item.node.image;
+    var image = item.node.image
 
     return (
       <TouchableOpacity
@@ -42,11 +38,11 @@ class ImageItem extends Component {
           { (selected) ? marker : null }
         </Image>
       </TouchableOpacity>
-    );
+    )
   }
 
-  _handleClick(item) {
-    this.props.onClick(item);
+  _handleClick (item) {
+    this.props.onClick(item)
   }
 }
 
@@ -55,13 +51,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 5,
     right: 5,
-    backgroundColor: 'transparent',
-  },
+    backgroundColor: 'transparent'
+  }
 })
 
 ImageItem.defaultProps = {
   item: {},
-  selected: false,
+  selected: false
 }
 
 ImageItem.propTypes = {
@@ -70,7 +66,7 @@ ImageItem.propTypes = {
   selectedMarker: React.PropTypes.element,
   imageMargin: React.PropTypes.number,
   imagesPerRow: React.PropTypes.number,
-  onClick: React.PropTypes.func,
+  onClick: React.PropTypes.func
 }
 
-export default ImageItem;
+export default ImageItem

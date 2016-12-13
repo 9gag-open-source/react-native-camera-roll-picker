@@ -4,39 +4,39 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import {
   AppRegistry,
   StyleSheet,
   Text,
   View
-} from 'react-native';
+} from 'react-native'
 
-import CameraRollPicker from 'react-native-camera-roll-picker';
+import CameraRollPicker from 'react-native-camera-roll-picker'
 
 export default class Example extends Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.state = {
       num: 0,
-      selected: [],
-    };
+      selected: []
+    }
   }
 
-  getSelectedImages(images, current) {
-    var num = images.length;
+  getSelectedImages (images, current) {
+    var num = images.length
 
     this.setState({
       num: num,
-      selected: images,
-    });
+      selected: images
+    })
 
-    console.log(current);
-    console.log(this.state.selected);
+    console.log(current)
+    console.log(this.state.selected)
   }
 
-  render() {
+  render () {
     return (
       <View style={styles.container}>
         <View style={styles.content}>
@@ -55,17 +55,18 @@ export default class Example extends Component {
           selected={this.state.selected}
           assetType='Photos'
           imagesPerRow={3}
-          imageMargin={5}
+          imageMargin={4}
+          pickerButtonTypes={['Camera','Album']}
           callback={this.getSelectedImages.bind(this)} />
       </View>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6AE2D',
+    backgroundColor: '#F6AE2D'
   },
   content: {
     marginTop: 15,
@@ -73,19 +74,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   text: {
     fontSize: 16,
     alignItems: 'center',
-    color: '#fff',
+    color: '#fff'
   },
   bold: {
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   info: {
-    fontSize: 12,
-  },
-});
+    fontSize: 12
+  }
+})
 
-AppRegistry.registerComponent('Example', () => Example);
+AppRegistry.registerComponent('Example', () => Example)
