@@ -21,33 +21,15 @@ class PickerButtonItem extends Component {
   }
 
   render () {
-    var {item, imageMargin} = this.props
-    var source = null
-    var text = null
-    switch (item) {
-      case 'Camera':
-        source = require('./img/ic_camera_black_48dp.png')
-        text = 'Camera'
-        break
-      default:
-      case 'Album':
-        source = require('./img/ic_picture_black_48dp.png')
-        text = 'All Photos'
-        break
-    }
+    var {item, imageMargin, source, text} = this.props
     return (
       <TouchableOpacity
-        style={[styles.wrapper, {
-          marginBottom: imageMargin,
-          marginRight: imageMargin,
-          height: this._imageSize,
-          width: this._imageSize
-        }]}
+        style={{marginBottom: imageMargin, marginRight: imageMargin}}
         onPress={() => this._handleClick(item)}>
-        <View style={styles.imageWrapper}>
-          <Image source={source} style={[styles.image]}></Image>
+        <View style={[styles.imageWrapper, {height: this._imageSize, width: this._imageSize}]}>
+          <Image source={source} style={[styles.image]} />
         </View>
-        <Text style={[styles.text, {textAlign: 'center'}]}>{text}</Text>
+        <Text style={[styles.text, {textAlign: 'center', width: this._imageSize}]}>{text}</Text>
       </TouchableOpacity>
     )
   }
@@ -58,23 +40,19 @@ class PickerButtonItem extends Component {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flexDirection: 'column',
-    flex: 1
-  },
   image: {
     tintColor: 'rgba(0,0,0,0.4)',
     width: 40,
     height: 40,
-    resizeMode: 'contain',
+    resizeMode: 'contain'
   },
   imageWrapper: {
-    justifyContent:'center',
+    justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
-    top: 10,
+    flex: 1
   },
   text: {
+    position: 'absolute',
     bottom: 10,
     fontSize: 14,
     color: 'rgba(0,0,0,0.4)'
