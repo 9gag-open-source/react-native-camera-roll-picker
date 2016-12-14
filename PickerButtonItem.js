@@ -21,15 +21,16 @@ class PickerButtonItem extends Component {
   }
 
   render () {
-    var {item, imageMargin, source, text} = this.props
+    var {item, imageMargin, source, text, tintColor} = this.props
+    console.log("tintColor", tintColor);
     return (
       <TouchableOpacity
         style={{marginBottom: imageMargin, marginRight: imageMargin}}
         onPress={() => this._handleClick(item)}>
         <View style={[styles.imageWrapper, {height: this._imageSize, width: this._imageSize}]}>
-          <Image source={source} style={[styles.image]} />
+          <Image source={source} style={[styles.image, {tintColor: tintColor}]} />
         </View>
-        <Text style={[styles.text, {textAlign: 'center', width: this._imageSize}]}>{text}</Text>
+        <Text style={[styles.text, {textAlign: 'center', width: this._imageSize, color: tintColor}]}>{text}</Text>
       </TouchableOpacity>
     )
   }
@@ -41,7 +42,6 @@ class PickerButtonItem extends Component {
 
 const styles = StyleSheet.create({
   image: {
-    tintColor: 'rgba(0,0,0,0.4)',
     width: 40,
     height: 40,
     resizeMode: 'contain'
@@ -55,7 +55,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 10,
     fontSize: 14,
-    color: 'rgba(0,0,0,0.4)'
   }
 })
 

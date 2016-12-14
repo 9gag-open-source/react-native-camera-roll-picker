@@ -126,7 +126,8 @@ class CameraRollPicker extends Component {
       imagesPerRow,
       containerWidth,
       cameraText,
-      albumText
+      albumText,
+      tintColor
     } = this.props
 
     var source = null
@@ -151,6 +152,7 @@ class CameraRollPicker extends Component {
         imageMargin={imageMargin}
         imagesPerRow={imagesPerRow}
         containerWidth={containerWidth}
+        tintColor={tintColor}
         onClick={this._onPickerItemClick.bind(this)}
       />
     )
@@ -373,7 +375,8 @@ CameraRollPicker.propTypes = {
   emptyTextStyle: Text.propTypes.style,
   pickerButtonTypes: React.PropTypes.arrayOf(
     React.PropTypes.string // 'Camera', 'Album'
-  )
+  ),
+  tintColor: React.PropTypes.string
 }
 
 CameraRollPicker.defaultProps = {
@@ -395,7 +398,8 @@ CameraRollPicker.defaultProps = {
   emptyText: 'No photos.',
   cameraText: 'Camera',
   albumText: 'All Photos',
-  pickerButtonTypes: ['Camera', 'Album']
+  pickerButtonTypes: ['Camera', 'Album'],
+  tintColor: 'rgba(0,0,0,0.4)'
 }
 
 export default CameraRollPicker
