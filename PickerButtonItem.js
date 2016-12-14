@@ -26,12 +26,12 @@ class PickerButtonItem extends Component {
     var text = null
     switch (item) {
       case 'Camera':
-        source = require('./img/ic_camera_black_24dp.png')
+        source = require('./img/ic_camera_black_48dp.png')
         text = 'Camera'
         break
       default:
       case 'Album':
-        source = require('./img/ic_picture_black_24dp.png')
+        source = require('./img/ic_picture_black_48dp.png')
         text = 'All Photos'
         break
     }
@@ -63,19 +63,21 @@ const styles = StyleSheet.create({
     flex: 1
   },
   image: {
-    tintColor: '#cccccc',
+    tintColor: 'rgba(0,0,0,0.4)',
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
   },
   imageWrapper: {
-    top: 10,
     justifyContent:'center',
     alignItems: 'center',
-    flex: 1.5
+    flex: 1,
+    top: 10,
   },
   text: {
+    bottom: 10,
     fontSize: 14,
-    alignItems: 'center',
-    color: '#cccccc',
-    flex: 1
+    color: 'rgba(0,0,0,0.4)'
   }
 })
 

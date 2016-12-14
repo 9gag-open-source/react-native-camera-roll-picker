@@ -8,6 +8,7 @@ import {
   ListView,
   ActivityIndicator
 } from 'react-native'
+import ImagePicker from 'react-native-image-picker'
 import ImageItem from './ImageItem'
 import PickerButtonItem from './PickerButtonItem'
 
@@ -235,7 +236,7 @@ class CameraRollPicker extends Component {
 
     var initialIndex = temp.length
 
-    for (var i = 0; i < data.length; ++i) {
+    for (i = 0; i < data.length; ++i) {
       var index = i + initialIndex
       if (index > 0 && index % n === 0) {
         result.push(temp)
@@ -257,7 +258,62 @@ class CameraRollPicker extends Component {
   }
 
   _onPickerItemClick (item) {
-    console.log('_onPickerItemClick', item)
+    const options = {
+      quality: 1.0
+      // maxWidth: 500,
+      // maxHeight: 500,
+      // storageOptions: {
+      //   skipBackup: true
+      // }
+    }
+    switch (item) {
+      case 'Camera': {
+        ImagePicker.launchCamera(options, (response) => {
+          // console.log('Response = ', response)
+          if (response.didCancel) {
+            console.log('User cancelled photo camera')
+          } else if (response.error) {
+            console.log('ImagePicker Error: ', response.error)
+          } else {
+            var source
+            // You can display the image using either:
+            // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
+            // Or:
+            if (Platform.OS === 'android') {
+              source = {uri: response.uri, isStatic: true}
+            } else {
+              source = {uri: response.uri.replace('file://', ''), isStatic: true}
+            }
+            console.log('Camera: ', source)
+          }
+        })
+      }
+        break
+      case 'Album': {
+        ImagePicker.launchImageLibrary(options, (response) => {
+          // console.log('Response = ', response)
+          if (response.didCancel) {
+            console.log('User cancelled photo album')
+          } else if (response.error) {
+            console.log('ImagePicker Error: ', response.error)
+          } else {
+            var source
+            // You can display the image using either:
+            // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
+            // Or:
+            if (Platform.OS === 'android') {
+              source = {uri: response.uri, isStatic: true}
+            } else {
+              source = {uri: response.uri.replace('file://', ''), isStatic: true}
+            }
+            console.log('Album: ', source)
+          }
+        })
+      }
+        break
+      default:
+        break
+    }
   }
 }
 

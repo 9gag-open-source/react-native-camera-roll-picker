@@ -22,7 +22,7 @@ class ImageItem extends Component {
 
     var marker = selectedMarker ||
     <Image
-      style={[styles.marker, {width: 25, height: 25}]}
+      style={[styles.marker, {width: 24, height: 24}]}
       source={require('./img/ic_radio_checked_black_24dp.png')}
       />
 

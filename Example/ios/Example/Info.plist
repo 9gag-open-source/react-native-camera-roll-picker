@@ -50,6 +50,8 @@
 		</dict>
 	</dict>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app attempts to access your camera data.</string>
+	<string>This app attempts to access your photo library.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app attempts to access your camera.</string>
 </dict>
 </plist>
