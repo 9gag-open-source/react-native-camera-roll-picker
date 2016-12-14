@@ -19,7 +19,6 @@ class ImageItem extends Component {
 
   render () {
     var {item, selected, selectedMarker, imageMargin} = this.props
-
     var marker = selectedMarker ||
     <Image
       style={[styles.marker, {width: 24, height: 24}]}
@@ -41,8 +40,8 @@ class ImageItem extends Component {
     )
   }
 
-  _handleClick (item) {
-    this.props.onClick(item)
+  _handleClick (image) {
+    this.props.onClick(image)
   }
 }
 

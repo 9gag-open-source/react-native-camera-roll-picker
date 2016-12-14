@@ -123,18 +123,36 @@ class CameraRollPicker extends Component {
   _renderPickerButton (item) {
     var {
       imageMargin,
-      selectedMarker,
       imagesPerRow,
-      containerWidth
+      containerWidth,
+      cameraText,
+      albumText,
+      tintColor
     } = this.props
+
+    var source = null
+    var text = ''
+    switch (item) {
+      case 'Camera':
+        source = require('./img/ic_camera_black_48dp.png')
+        text = cameraText
+        break
+      default:
+      case 'Album':
+        source = require('./img/ic_picture_black_48dp.png')
+        text = albumText
+        break
+    }
     return (
       <PickerButtonItem
         key={item}
         item={item}
+        source={source}
+        text={text}
         imageMargin={imageMargin}
-        selectedMarker={selectedMarker}
         imagesPerRow={imagesPerRow}
         containerWidth={containerWidth}
+        tintColor={tintColor}
         onClick={this._onPickerItemClick.bind(this)}
       />
     )
@@ -146,11 +164,12 @@ class CameraRollPicker extends Component {
       imageMargin,
       selectedMarker,
       imagesPerRow,
-      containerWidth
+      containerWidth,
+      maximum
     } = this.props
 
     var uri = item.node.image.uri
-    var isSelected = (this._arrayObjectIndexOf(selected, 'uri', uri) >= 0)
+    var isSelected = (this._arrayObjectIndexOf(selected, 'uri', uri) >= 0) && maximum > 1
 
     return (
       <ImageItem
@@ -269,50 +288,43 @@ class CameraRollPicker extends Component {
     switch (item) {
       case 'Camera': {
         ImagePicker.launchCamera(options, (response) => {
-          // console.log('Response = ', response)
-          if (response.didCancel) {
-            console.log('User cancelled photo camera')
-          } else if (response.error) {
-            console.log('ImagePicker Error: ', response.error)
-          } else {
-            var source
-            // You can display the image using either:
-            // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
-            // Or:
-            if (Platform.OS === 'android') {
-              source = {uri: response.uri, isStatic: true}
-            } else {
-              source = {uri: response.uri.replace('file://', ''), isStatic: true}
-            }
-            console.log('Camera: ', source)
-          }
+          this._onPickerComplete(response)
         })
       }
         break
       case 'Album': {
         ImagePicker.launchImageLibrary(options, (response) => {
-          // console.log('Response = ', response)
-          if (response.didCancel) {
-            console.log('User cancelled photo album')
-          } else if (response.error) {
-            console.log('ImagePicker Error: ', response.error)
-          } else {
-            var source
-            // You can display the image using either:
-            // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
-            // Or:
-            if (Platform.OS === 'android') {
-              source = {uri: response.uri, isStatic: true}
-            } else {
-              source = {uri: response.uri.replace('file://', ''), isStatic: true}
-            }
-            console.log('Album: ', source)
-          }
+          this._onPickerComplete(response)
         })
       }
         break
       default:
         break
+    }
+  }
+
+  _onPickerComplete (response) {
+    var {callback} = this.props
+    // console.log('Response = ', response)
+    if (response.didCancel) {
+      console.log('User cancelled photo camera')
+    } else if (response.error) {
+      console.log('ImagePicker Error: ', response.error)
+    } else {
+      var image = {}
+      image['isStored'] = true
+      image['width'] = response.width
+      image['height'] = response.height
+      image['filename'] = response.fileName
+      // You can display the image using either:
+      // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
+      // Or:
+      if (Platform.OS === 'android') {
+        image['uri'] = response.uri
+      } else {
+        image['uri'] = response.uri.replace('file://', '')
+      }
+      callback(this.state.selected, image)
     }
   }
 }
@@ -363,7 +375,8 @@ CameraRollPicker.propTypes = {
   emptyTextStyle: Text.propTypes.style,
   pickerButtonTypes: React.PropTypes.arrayOf(
     React.PropTypes.string // 'Camera', 'Album'
-  )
+  ),
+  tintColor: React.PropTypes.string
 }
 
 CameraRollPicker.defaultProps = {
@@ -383,7 +396,10 @@ CameraRollPicker.defaultProps = {
     console.log(selectedImages)
   },
   emptyText: 'No photos.',
-  pickerButtonTypes: ['Camera', 'Album']
+  cameraText: 'Camera',
+  albumText: 'All Photos',
+  pickerButtonTypes: ['Camera', 'Album'],
+  tintColor: 'rgba(0,0,0,0.4)'
 }
 
 export default CameraRollPicker
