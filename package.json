@@ -24,7 +24,7 @@
     "url": "https://github.com/jeanpan/react-native-camera-roll-picker/issues"
   },
   "dependencies": {
-    "react-native-image-picker": "^0.24.1"
+    "react-native-image-picker": "https://github.com/9gag-open-source/react-native-image-picker#feature/65-ios-upload-post"
   },
   "homepage": "https://github.com/jeanpan/react-native-camera-roll-picker#readme"
 }
