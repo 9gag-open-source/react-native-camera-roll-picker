@@ -22,7 +22,6 @@ class PickerButtonItem extends Component {
 
   render () {
     var {item, imageMargin, source, text, tintColor} = this.props
-    console.log("tintColor", tintColor);
     return (
       <TouchableOpacity
         style={{marginBottom: imageMargin, marginRight: imageMargin}}
