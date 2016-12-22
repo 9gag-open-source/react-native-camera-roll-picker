@@ -131,7 +131,7 @@ class CameraRollPicker extends Component {
 
   _naiveGetMimeType (image : ImageObject) {
     try {
-      let ext = image.subStr(image.uri.lastIndexOf('.') + 1).toLowerCase()
+      let ext = image.substr(image.uri.lastIndexOf('.') + 1).toLowerCase()
       switch (ext) {
         case 'jpg':
         case 'jpeg':
