@@ -28,10 +28,12 @@ class ImageItem extends Component {
 
     var image = item.node.image
 
+    console.log('CameraRoll', image)
+
     if (Platform.OS === 'android') {
       image.mimeType = item.node.type
     } else {
-      image.mimeType = this._naiveGetMimeType(item.node.filename)
+      image.mimeType = this._naiveGetMimeType(item.node.image.filename)
     }
 
     return (
@@ -51,9 +53,9 @@ class ImageItem extends Component {
     this.props.onClick(image)
   }
 
-  _naiveGetMimeType (image) {
+  _naiveGetMimeType (filename) {
     try {
-      let ext = image.substr(image.uri.lastIndexOf('.') + 1).toLowerCase()
+      let ext = filename.substr(filename.lastIndexOf('.') + 1).toLowerCase()
       switch (ext) {
         case 'jpg':
         case 'jpeg':
