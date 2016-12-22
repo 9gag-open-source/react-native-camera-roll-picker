@@ -27,9 +27,7 @@ class ImageItem extends Component {
       />
 
     var image = item.node.image
-
-    console.log('CameraRoll', image)
-
+    
     if (Platform.OS === 'android') {
       image.mimeType = item.node.type
     } else {
