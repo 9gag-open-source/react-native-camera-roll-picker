@@ -247,7 +247,7 @@ class CameraRollPicker extends Component {
   }
 
   _selectImage (image) {
-    var {maximum, imagesPerRow, callback} = this.props
+    var {maximum, imagesPerRow, onPick} = this.props
 
     var selected = this.state.selected
     var index = this._arrayObjectIndexOf(selected, 'uri', image.uri)
@@ -267,7 +267,9 @@ class CameraRollPicker extends Component {
       )
     })
 
-    callback(this.state.selected, image)
+    onPick(this.state.selected, image)
+
+    this._resizeImage(image.uri)
   }
 
   _nEveryRow (data, n) {
@@ -307,23 +309,23 @@ class CameraRollPicker extends Component {
   }
 
   _onPickerItemClick (item) {
-    const options = {
-      quality: 1.0
-      // maxWidth: 500,
-      // maxHeight: 500,
+    // const options = {
+      // quality: this.props.quality,
+      // maxWidth: this.props.maxWidth,
+      // maxHeight: this.props.maxHeight
       // storageOptions: {
       //   skipBackup: true
       // }
-    }
+    // }
     switch (item) {
       case 'Camera': {
-        ImagePicker.launchCamera(options, (response) => {
+        ImagePicker.launchCamera({}, (response) => {
           this._onPickerComplete(response)
         })
       }
         break
       case 'Album': {
-        ImagePicker.launchImageLibrary(options, (response) => {
+        ImagePicker.launchImageLibrary({}, (response) => {
           this._onPickerComplete(response)
         })
       }
@@ -334,35 +336,60 @@ class CameraRollPicker extends Component {
   }
 
   _onPickerComplete (response) {
-    var {callback} = this.props
+    var {onPick} = this.props
     // console.log('Response = ', response)
     if (response.didCancel) {
       console.log('User cancelled photo camera')
     } else if (response.error) {
       console.log('ImagePicker Error: ', response.error)
     } else {
-      var image = {}
-      image['isStored'] = true
-      image['width'] = response.width
-      image['height'] = response.height
-      image['filename'] = response.fileName
-      // You can display the image using either:
-      // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
-      // Or:
-      if (Platform.OS === 'android') {
-        image['uri'] = response.uri
-      } else {
+      onPick(this.state.selected, this._getImageFromResponse(response))
+      this._resizeImage(response.uri)
+    }
+  }
+
+  _getImageFromResponse (response) {
+    var image = {}
+    image['isStored'] = true
+    image['width'] = response.width
+    image['height'] = response.height
+    image['filename'] = response.fileName
+    // You can display the image using either:
+    // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
+    // Or:
+    if (Platform.OS === 'android') {
+      image['uri'] = response.uri
+    } else {
+      if (response.uri) {
         image['uri'] = response.uri.replace('file://', '')
       }
-
-      if (Platform.OS === 'android') {
-        image['mimeType'] = response.type
-      } else {
-        image['mimeType'] = this._naiveGetMimeType(response)
-      }
-
-      callback(this.state.selected, image)
     }
+
+    if (Platform.OS === 'android') {
+      image['mimeType'] = response.type
+    } else {
+      image['mimeType'] = this._naiveGetMimeType(response)
+    }
+    return image
+  }
+
+  _resizeImage (uri) {
+    if (this.props.onResize === null) {
+      return
+    }
+    let options = Object.assign({
+      maxWidth: this.props.maxWidth,
+      maxHeight: this.props.maxHeight,
+      quality: this.props.quality
+    }, {uri: uri})
+    ImagePicker.downscaleImageIfNecessary(options, (response) => {
+      if (response.error) {
+        console.log('Resize Error: ', response.error)
+        this.props.onResize(null)
+      } else {
+        this.props.onResize(this._getImageFromResponse(response))
+      }
+    })
   }
 }
 
@@ -404,7 +431,8 @@ CameraRollPicker.propTypes = {
   imagesPerRow: React.PropTypes.number,
   imageMargin: React.PropTypes.number,
   containerWidth: React.PropTypes.number,
-  callback: React.PropTypes.func,
+  onPick: React.PropTypes.func,
+  onResize: React.PropTypes.func,
   selected: React.PropTypes.array,
   selectedMarker: React.PropTypes.element,
   backgroundColor: React.PropTypes.string,
@@ -413,7 +441,10 @@ CameraRollPicker.propTypes = {
   pickerButtonTypes: React.PropTypes.arrayOf(
     React.PropTypes.string // 'Camera', 'Album'
   ),
-  tintColor: React.PropTypes.string
+  tintColor: React.PropTypes.string,
+  quality: React.PropTypes.number,
+  maxWidth: React.PropTypes.number,
+  maxHeight: React.PropTypes.number
 }
 
 CameraRollPicker.defaultProps = {
@@ -428,15 +459,19 @@ CameraRollPicker.defaultProps = {
   assetType: 'Photos',
   backgroundColor: 'white',
   selected: [],
-  callback: function (selectedImages, currentImage) {
+  onPick: function (selectedImages, currentImage) {
     console.log(currentImage)
     console.log(selectedImages)
   },
+  onResize: null,
   emptyText: 'No photos.',
   cameraText: 'Camera',
   albumText: 'All Photos',
   pickerButtonTypes: ['Camera', 'Album'],
-  tintColor: 'rgba(0,0,0,0.4)'
+  tintColor: 'rgba(0,0,0,0.4)',
+  quality: 1.0,
+  maxWidth: 1280,
+  maxHeight: 1280
 }
 
 export default CameraRollPicker
