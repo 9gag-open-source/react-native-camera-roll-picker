@@ -3,7 +3,8 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform
 } from 'react-native'
 
 class ImageItem extends Component {
@@ -26,6 +27,12 @@ class ImageItem extends Component {
       />
 
     var image = item.node.image
+
+    if (Platform.OS === 'android') {
+      image.mimeType = item.node.type
+    } else {
+      image.mimeType = this._naiveGetMimeType(item.node.filename)
+    }
 
     return (
       <TouchableOpacity

@@ -4,50 +4,89 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import {
   AppRegistry,
   StyleSheet,
   Text,
   View
-} from 'react-native';
+} from 'react-native'
+
+import CameraRollPicker from 'react-native-camera-roll-picker'
 
 export default class Example extends Component {
-  render() {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      num: 0,
+      selected: []
+    }
+  }
+
+  getSelectedImages (images, current) {
+    var num = images.length
+
+    this.setState({
+      num: num,
+      selected: images
+    })
+
+    console.log(current)
+    console.log(this.state.selected)
+  }
+
+  render () {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
+        <View style={styles.content}>
+          <Text style={styles.text}>
+            <Text style={styles.bold}> {this.state.num} </Text> images has been selected
+          </Text>
+        </View>
+        <CameraRollPicker
+          scrollRenderAheadDistance={500}
+          initialListSize={1}
+          pageSize={3}
+          removeClippedSubviews={false}
+          groupTypes='SavedPhotos'
+          batchSize={5}
+          maximum={3}
+          selected={this.state.selected}
+          assetType='Photos'
+          imagesPerRow={3}
+          imageMargin={4}
+          pickerButtonTypes={['Camera','Album']}
+          callback={this.getSelectedImages.bind(this)} />
       </View>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F6AE2D'
+  },
+  content: {
+    marginTop: 15,
+    height: 50,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    flexWrap: 'wrap'
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  text: {
+    fontSize: 16,
+    alignItems: 'center',
+    color: '#fff'
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  bold: {
+    fontWeight: 'bold'
   },
-});
+  info: {
+    fontSize: 12
+  }
+})
 
-AppRegistry.registerComponent('Example', () => Example);
+AppRegistry.registerComponent('Example', () => Example)

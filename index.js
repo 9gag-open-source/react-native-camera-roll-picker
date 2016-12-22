@@ -1,16 +1,25 @@
 import React, {Component} from 'react'
 import {
   CameraRoll,
-  Platform,
   StyleSheet,
   View,
   Text,
   ListView,
-  ActivityIndicator
+  ActivityIndicator,
+  Platform
 } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
 import ImageItem from './ImageItem'
 import PickerButtonItem from './PickerButtonItem'
+
+type ImageObject = {
+  filename: string,
+  uri: string,
+  height: number,
+  width: number,
+  mimeType: string,
+  type: string
+}
 
 class CameraRollPicker extends Component {
   constructor (props) {
@@ -118,6 +127,27 @@ class CameraRollPicker extends Component {
         {listViewOrEmptyText}
       </View>
     )
+  }
+
+  _naiveGetMimeType (image : ImageObject) {
+    try {
+      let ext = image.subStr(image.uri.lastIndexOf('.') + 1).toLowerCase()
+      switch (ext) {
+        case 'jpg':
+        case 'jpeg':
+          return 'image/jpeg'
+        case 'png':
+          return 'image/png'
+        case 'gif':
+          return 'image/gif'
+        default:
+          return 'image/jpeg'
+      }
+
+    } catch (err) {
+      console.error(err);
+      return 'image/jpeg'
+    }
   }
 
   _renderPickerButton (item) {
@@ -333,6 +363,12 @@ class CameraRollPicker extends Component {
       if (response.uri) {
         image['uri'] = response.uri.replace('file://', '')
       }
+    }
+
+    if (Platform.OS === 'android') {
+      image['mimeType'] = response.type
+    } else {
+      image['mimeType'] = this._naiveGetMimeType(response)
     }
     return image
   }
