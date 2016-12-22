@@ -50,6 +50,27 @@ class ImageItem extends Component {
   _handleClick (image) {
     this.props.onClick(image)
   }
+
+  _naiveGetMimeType (image) {
+    try {
+      let ext = image.subStr(image.uri.lastIndexOf('.') + 1).toLowerCase()
+      switch (ext) {
+        case 'jpg':
+        case 'jpeg':
+          return 'image/jpeg'
+        case 'png':
+          return 'image/png'
+        case 'gif':
+          return 'image/gif'
+        default:
+          return 'image/jpeg'
+      }
+
+    } catch (err) {
+      console.error(err);
+      return 'image/jpeg'
+    }
+  }
 }
 
 const styles = StyleSheet.create({
