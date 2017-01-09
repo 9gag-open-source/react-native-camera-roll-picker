@@ -103,7 +103,10 @@ class CameraRollPicker extends Component {
   }
 
   render () {
-    var {dataSource} = this.state
+    var {
+      dataSource,
+      loadingMore
+    } = this.state
     var {
       scrollRenderAheadDistance,
       initialListSize,
@@ -111,28 +114,39 @@ class CameraRollPicker extends Component {
       removeClippedSubviews,
       backgroundColor,
       emptyText,
-      emptyTextStyle
+      emptyTextStyle,
+      tintColor
     } = this.props
-
-    var listViewOrEmptyText = dataSource.getRowCount() > 0 ? (
-      <ListView
-        style={{flex: 1}}
-        scrollRenderAheadDistance={scrollRenderAheadDistance}
-        initialListSize={initialListSize}
-        pageSize={pageSize}
-        removeClippedSubviews={removeClippedSubviews}
-        renderFooter={this._renderFooterSpinner.bind(this)}
-        onEndReached={this._onEndReached.bind(this)}
-        dataSource={dataSource}
-        renderRow={rowData => this._renderRow(rowData)} />
-    ) : (
-      <Text style={[{textAlign: 'center'}, emptyTextStyle]}>{emptyText}</Text>
-    )
 
     return (
       <View
         style={[styles.wrapper, {padding: 0, backgroundColor: backgroundColor}]}>
-        {listViewOrEmptyText}
+        {dataSource.getRowCount() > 0 ? (
+          <ListView
+            style={{flex: 1}}
+            scrollRenderAheadDistance={scrollRenderAheadDistance}
+            initialListSize={initialListSize}
+            pageSize={pageSize}
+            removeClippedSubviews={removeClippedSubviews}
+            renderFooter={this._renderFooterSpinner.bind(this)}
+            onEndReached={this._onEndReached.bind(this)}
+            dataSource={dataSource}
+            renderRow={rowData => this._renderRow(rowData)} />
+        ) : (
+          <View style={{flex: 1, alignItems:'center', justifyContent:'center'}}>
+            {loadingMore ? (
+              <ActivityIndicator
+                size={'large'}
+                style={{margin: 16}}
+                color={tintColor}
+                animating
+                hidesWhenStopped
+              />
+            ) : (
+              <Text style={[{textAlign: 'center', color: tintColor}, emptyTextStyle]}>{emptyText}</Text>
+            )}
+          </View>
+        )}
       </View>
     )
   }
