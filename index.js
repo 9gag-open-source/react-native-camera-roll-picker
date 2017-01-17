@@ -415,7 +415,8 @@ class CameraRollPicker extends Component {
   _onPickerItemClick (item) {
     switch (item) {
       case 'Camera': {
-        Permissions.requestPermission('camera')
+        // For now, since Android is not using any in app camera
+        Permissions.requestPermission(this.props.androidOverrideCameraPermissionWithPhotoPermission ? 'photo' : 'camera')
           .then(res => {
             this.setState({
               permissionStatus: {...this.state.permissionStatus, ['camera']: res}
@@ -648,7 +649,8 @@ CameraRollPicker.propTypes = {
   resizedMaxWidth: React.PropTypes.number,
   resizedMaxHeight: React.PropTypes.number,
   maxPixelDimension: React.PropTypes.number,
-  maxHeightToWidthRatio: React.PropTypes.number
+  maxHeightToWidthRatio: React.PropTypes.number,
+  androidOverrideCameraPermissionWithPhotoPermission: React.PropTypes.bool
 }
 
 CameraRollPicker.defaultProps = {
@@ -688,7 +690,10 @@ CameraRollPicker.defaultProps = {
   resizedMaxWidth: null,
   resizedMaxHeight: 25000,
   maxPixelDimension: 100000000,
-  maxHeightToWidthRatio: 15000.0 / 460.0
+  maxHeightToWidthRatio: 15000.0 / 460.0,
+  // If there's no in-app camera, Android is able to launch camera without camera permission
+  // This is to avoid asking excessive permissions
+  androidOverrideCameraPermissionWithPhotoPermission: false
 }
 
 export default CameraRollPicker
