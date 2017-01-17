@@ -21,6 +21,12 @@ type ImageObject = {
   type: string
 }
 
+const ErrorCode = {
+  ErrorTooLarge: 'TooLarge',
+  ErrorTooSmall: 'TooSmall',
+  ErrorTooLong: 'TooLong'
+}
+
 class CameraRollPicker extends Component {
   constructor (props) {
     super(props)
@@ -365,12 +371,13 @@ class CameraRollPicker extends Component {
     } else if (response.error) {
       console.log('ImagePicker Error: ', response.error)
     } else {
-      onPick(this.state.selected, this._getImageFromResponse(response))
+      const image = this._getImageFromResponse(response)
+      onPick(this.state.selected, image)
       this._resizeImage(response.uri)
     }
   }
 
-  _getImageFromResponse (response) {
+  _getImageFromResponse (response): ImageObject {
     var image = {}
     image['isStored'] = true
     image['width'] = response.width
@@ -399,18 +406,61 @@ class CameraRollPicker extends Component {
     if (this.props.onResize === null) {
       return
     }
-    let options = Object.assign({
-      maxWidth: this.props.maxWidth,
-      maxHeight: this.props.maxHeight,
-      quality: this.props.quality
-    }, {uri: uri})
+    var options = {
+      uri: uri,
+      quality: this.props.quality,
+    }
+    if (this.props.resizeToMaxWidth) {
+      options = Object.assign(options, { maxWidth: this.props.resizeToMaxWidth })
+    }
+    if (this.props.resizeToMaxHeight) {
+      options = Object.assign(options, { maxHeight: this.props.resizeToMaxHeight })
+    }
+
     ImagePicker.downscaleImageIfNecessary(options, (response) => {
       if (response.error) {
         console.log('Resize Error: ', response.error)
-        this.props.onResize(null)
+        this.props.onResize(response.error, null)
       } else {
-        this.props.onResize(this._getImageFromResponse(response))
+        const image = this._getImageFromResponse(response)
+        this._validateImageDimension(image)
+          .then(result => {
+            this.props.onResize(null, image)
+          })
+          .catch(error => {
+            this.props.onResize(error, image)
+          })
       }
+    })
+  }
+
+  _validateImageDimension (image) {
+    const {
+      minWidth,
+      minHeight,
+      resizedMaxWidth,
+      resizedMaxHeight,
+      maxPixelDimension,
+      maxHeightToWidthRatio
+    } = this.props
+
+    return new Promise((resolve, reject) => {
+      if (resizedMaxHeight && image.height > resizedMaxHeight) {
+        return reject(ErrorCode.ErrorTooLarge)
+      }
+      if (resizedMaxWidth && image.width > resizedMaxWidth) {
+        return reject(ErrorCode.ErrorTooLarge)
+      }
+      if (image.width * image.height > maxPixelDimension) {
+        return reject(ErrorCode.ErrorTooLarge)
+      }
+      if (image.height / image.width > maxHeightToWidthRatio) {
+        return reject(ErrorCode.ErrorTooLong)
+      }
+      if (image.width < minWidth || image.height < minHeight) {
+        return reject(ErrorCode.ErrorTooSmall)
+      }
+      return resolve(image)
     })
   }
 }
@@ -465,8 +515,14 @@ CameraRollPicker.propTypes = {
   ),
   tintColor: React.PropTypes.string,
   quality: React.PropTypes.number,
-  maxWidth: React.PropTypes.number,
-  maxHeight: React.PropTypes.number
+  minWidth: React.PropTypes.number,
+  minHeight: React.PropTypes.number,
+  resizeToMaxWidth: React.PropTypes.number,
+  resizeToMaxHeight: React.PropTypes.number,
+  resizedMaxWidth: React.PropTypes.number,
+  resizedMaxHeight: React.PropTypes.number,
+  maxPixelDimension: React.PropTypes.number,
+  maxHeightToWidthRatio: React.PropTypes.number
 }
 
 CameraRollPicker.defaultProps = {
@@ -492,8 +548,14 @@ CameraRollPicker.defaultProps = {
   pickerButtonTypes: ['Camera', 'Album'],
   tintColor: 'rgba(0,0,0,0.4)',
   quality: 1.0,
-  maxWidth: 1280,
-  maxHeight: 1280
+  minWidth: 200,
+  minHeight: 100,
+  resizeToMaxWidth: 1280,
+  resizeToMaxHeight: null,
+  resizedMaxWidth: null,
+  resizedMaxHeight: 25000,
+  maxPixelDimension: 100000000,
+  maxHeightToWidthRatio: 15000.0 / 460.0
 }
 
 export default CameraRollPicker
