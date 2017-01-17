@@ -6,11 +6,15 @@ import {
   Text,
   ListView,
   ActivityIndicator,
-  Platform
+  Platform,
+  Alert,
+  TouchableWithoutFeedback,
+  AppState
 } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
 import ImageItem from './ImageItem'
 import PickerButtonItem from './PickerButtonItem'
+import Permissions from 'react-native-permissions'
 
 type ImageObject = {
   filename: string,
@@ -37,12 +41,25 @@ class CameraRollPicker extends Component {
       lastCursor: null,
       loadingMore: false,
       noMore: false,
-      dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
+      dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
+      permissionStatus: {
+        photo: 'undetermined', //one of: 'authorized', 'denied', 'restricted', or 'undetermined' 
+        camera: 'undetermined'
+      }
     }
   }
 
   componentWillMount () {
     this.fetch()
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange.bind(this));
+  }
+
+  componentDidMount () {
+    this._updatePermissions()
+    AppState.addEventListener('change', this._handleAppStateChange.bind(this));
   }
 
   componentWillReceiveProps (nextProps) {
@@ -109,27 +126,23 @@ class CameraRollPicker extends Component {
   }
 
   render () {
-    var {
-      dataSource,
-      loadingMore
+    const {
+      dataSource
     } = this.state
-    var {
+    const {
       scrollRenderAheadDistance,
       initialListSize,
       pageSize,
       removeClippedSubviews,
       backgroundColor,
-      emptyText,
-      emptyTextStyle,
-      tintColor
     } = this.props
 
     return (
       <View
-        style={[styles.wrapper, {padding: 0, backgroundColor: backgroundColor}]}>
+        style={[styles.wrapper, {backgroundColor: backgroundColor}]}>
         {dataSource.getRowCount() > 0 ? (
           <ListView
-            style={{flex: 1}}
+            style={styles.listView}
             scrollRenderAheadDistance={scrollRenderAheadDistance}
             initialListSize={initialListSize}
             pageSize={pageSize}
@@ -139,19 +152,7 @@ class CameraRollPicker extends Component {
             dataSource={dataSource}
             renderRow={rowData => this._renderRow(rowData)} />
         ) : (
-          <View style={{flex: 1, alignItems:'center', justifyContent:'center'}}>
-            {loadingMore ? (
-              <ActivityIndicator
-                size={'large'}
-                style={{margin: 16}}
-                color={tintColor}
-                animating
-                hidesWhenStopped
-              />
-            ) : (
-              <Text style={[{textAlign: 'center', color: tintColor}, emptyTextStyle]}>{emptyText}</Text>
-            )}
-          </View>
+          this._renderEmptyOrLoading()
         )}
       </View>
     )
@@ -176,6 +177,81 @@ class CameraRollPicker extends Component {
       console.error(err);
       return 'image/jpeg'
     }
+  }
+
+  _renderLoading () {
+    const {
+      tintColor
+    } = this.props
+
+    return (
+      <ActivityIndicator
+        size={'large'}
+        color={tintColor}
+        animating
+        hidesWhenStopped
+      />
+    )
+  }
+
+  _renderEmpty () {    
+    const {
+      emptyText,
+      emptyTextStyle,
+      tintColor
+    } = this.props
+    
+    return (
+      <Text style={[{color: tintColor}, styles.text, emptyTextStyle]}>
+        { emptyText }
+      </Text>
+    )
+  }
+
+  _renderNoPermission () {
+    const {
+      emptyTextStyle,
+      noPhotoPermissionText,
+      noPhotoPermissionButtonText,
+      tintColor,
+      accentColor
+    } = this.props
+
+    // <Text style={styles.text}>Open settings</Text>
+
+    return (
+        <View>
+          <Text style={[{color: tintColor}, styles.text, emptyTextStyle]}>
+            { noPhotoPermissionText }
+          </Text>
+          <TouchableWithoutFeedback onPress={ Permissions.openSettings }>
+            <Text style={[{color: accentColor}, styles.text, emptyTextStyle]}>
+              { noPhotoPermissionButtonText }
+            </Text>
+          </TouchableWithoutFeedback>
+      </View>
+    )
+  }
+
+  _renderEmptyOrLoading () {
+    const {
+      loadingMore
+    } = this.state
+    const hasPhotoPermission = this.state.permissionStatus.photo === 'authorized'
+
+    return (
+      <View style={styles.emptyContainer}>
+        {loadingMore ? (
+          this._renderLoading()
+        ) : (
+          !hasPhotoPermission ? (
+            this._renderNoPermission()
+          ) : (
+            this._renderEmpty()
+          )
+        )}
+      </View>
+    )
   }
 
   _renderPickerButton (item) {
@@ -337,19 +413,36 @@ class CameraRollPicker extends Component {
   }
 
   _onPickerItemClick (item) {
-    // const options = {
-      // quality: this.props.quality,
-      // maxWidth: this.props.maxWidth,
-      // maxHeight: this.props.maxHeight
-      // storageOptions: {
-      //   skipBackup: true
-      // }
-    // }
     switch (item) {
       case 'Camera': {
-        ImagePicker.launchCamera({}, (response) => {
-          this._onPickerComplete(response)
-        })
+        Permissions.requestPermission('camera')
+          .then(res => {
+            this.setState({
+              permissionStatus: {...this.state.permissionStatus, ['camera']: res}
+            })
+
+            const {
+              noPermissionAlertTitle,
+              noCameraPermissionText,
+              noCameraPermissionButtonText,
+              cancelText
+            } = this.props
+
+            if (res !== 'authorized') {
+              Alert.alert(
+                noPermissionAlertTitle,
+                noCameraPermissionText,
+                [
+                  { text: cancelText, style: 'cancel' },
+                  { text: noCameraPermissionButtonText, onPress: Permissions.openSettings },
+                ]
+              )
+            } else {
+              ImagePicker.launchCamera({}, (response) => {
+                this._onPickerComplete(response)
+              })
+            }
+          }).catch(e => console.warn(e))
       }
         break
       case 'Album': {
@@ -463,10 +556,28 @@ class CameraRollPicker extends Component {
       return resolve(image)
     })
   }
+
+  //update permissions when app comes back from settings
+  _handleAppStateChange (appState) {
+    if (appState === 'active') {
+      this._updatePermissions()
+    }
+  }
+
+  _updatePermissions () {
+    Permissions.checkMultiplePermissions(['photo', 'camera'])
+      .then(status => {
+        this.setState({ permissionStatus: status})
+      })
+  }
 }
 
 const styles = StyleSheet.create({
   wrapper: {
+    flex: 1,
+    padding: 0
+  },
+  listView: {
     flex: 1
   },
   row: {
@@ -477,6 +588,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 5,
     backgroundColor: 'transparent'
+  },
+  emptyContainer: {
+    flex: 1, 
+    alignItems:'center', 
+    justifyContent:'center'
+  },
+  text: {
+    textAlign: 'center'
   }
 })
 
@@ -508,12 +627,19 @@ CameraRollPicker.propTypes = {
   selected: React.PropTypes.array,
   selectedMarker: React.PropTypes.element,
   backgroundColor: React.PropTypes.string,
+  cancelText: React.PropTypes.string,
+  noPermissionAlertTitle: React.PropTypes.string,
+  noPhotoPermissionText: React.PropTypes.string,
+  noPhotoPermissionButtonText: React.PropTypes.string,
+  noCameraPermissionText: React.PropTypes.string,
+  noCameraPermissionButtonText: React.PropTypes.string,
   emptyText: React.PropTypes.string,
   emptyTextStyle: Text.propTypes.style,
   pickerButtonTypes: React.PropTypes.arrayOf(
     React.PropTypes.string // 'Camera', 'Album'
   ),
   tintColor: React.PropTypes.string,
+  accentColor: React.PropTypes.string,
   quality: React.PropTypes.number,
   minWidth: React.PropTypes.number,
   minHeight: React.PropTypes.number,
@@ -542,11 +668,18 @@ CameraRollPicker.defaultProps = {
     console.log(selectedImages)
   },
   onResize: null,
+  noPermissionAlertTitle: 'Whoops!',
+  noPhotoPermissionText: 'No photo access permission. Please enable it from Settings.',
+  noPhotoPermissionButtonText: 'Open Settings',
+  noCameraPermissionText: 'No camera access permission. Please enable it from Settings.',
+  noCameraPermissionButtonText: 'Open Settings',
+  cancelText: 'Cancel',
   emptyText: 'No photos.',
   cameraText: 'Camera',
   albumText: 'All Photos',
   pickerButtonTypes: ['Camera', 'Album'],
   tintColor: 'rgba(0,0,0,0.4)',
+  accentColor: '#0088ff',
   quality: 1.0,
   minWidth: 200,
   minHeight: 100,
