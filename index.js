@@ -416,7 +416,7 @@ class CameraRollPicker extends Component {
     switch (item) {
       case 'Camera': {
         // For now, since Android is not using any in app camera
-        Permissions.requestPermission(this.props.androidOverrideCameraPermissionWithPhotoPermission ? 'photo' : 'camera')
+        Permissions.requestPermission(Platform.OS === 'android' && this.props.androidOverrideCameraPermissionWithPhotoPermission ? 'photo' : 'camera')
           .then(res => {
             this.setState({
               permissionStatus: {...this.state.permissionStatus, ['camera']: res}
