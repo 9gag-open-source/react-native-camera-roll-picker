@@ -28,9 +28,7 @@ class PickerButtonItem extends Component {
         onPress={() => this._handleClick(item)}
       >
         <View style={styles.buttonContainer}>
-          <View style={[{ height: this._imageSize, width: this._imageSize }]}>
-            <Image source={source} style={[styles.image, { tintColor }]} />
-          </View>
+          <Image source={source} style={[styles.image, { tintColor }]} />
           <Text style={[styles.text, {textAlign: 'center', width: this._imageSize, color: tintColor}]}>{text}</Text>
         </View>
       </TouchableOpacity>
