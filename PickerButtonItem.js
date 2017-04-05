@@ -27,8 +27,8 @@ class PickerButtonItem extends Component {
         style={{marginBottom: imageMargin, marginRight: imageMargin}}
         onPress={() => this._handleClick(item)}
       >
-        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={[styles.imageWrapper, {height: this._imageSize, width: this._imageSize}]}>
+        <View style={styles.buttonContainer}>
+          <View style={[{ height: this._imageSize, width: this._imageSize }]}>
             <Image source={source} style={[styles.image, { tintColor }]} />
           </View>
           <Text style={[styles.text, {textAlign: 'center', width: this._imageSize, color: tintColor}]}>{text}</Text>
@@ -48,14 +48,16 @@ const styles = StyleSheet.create({
     height: 36,
     resizeMode: 'contain'
   },
-  imageWrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1
-  },
   text: {
+    marginTop: 6,
     fontSize: 14,
     fontWeight: 'bold'
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })
 
