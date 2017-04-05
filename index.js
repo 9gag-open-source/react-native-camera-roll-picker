@@ -43,7 +43,7 @@ class CameraRollPicker extends Component {
       noMore: false,
       dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
       permissionStatus: {
-        photo: 'undetermined', //one of: 'authorized', 'denied', 'restricted', or 'undetermined' 
+        photo: 'undetermined', //one of: 'authorized', 'denied', 'restricted', or 'undetermined'
         camera: 'undetermined'
       }
     }
@@ -194,13 +194,13 @@ class CameraRollPicker extends Component {
     )
   }
 
-  _renderEmpty () {    
+  _renderEmpty () {
     const {
       emptyText,
       emptyTextStyle,
       tintColor
     } = this.props
-    
+
     return (
       <Text style={[{color: tintColor}, styles.text, emptyTextStyle]}>
         { emptyText }
@@ -273,7 +273,7 @@ class CameraRollPicker extends Component {
         break
       default:
       case 'Album':
-        source = require('./img/ic_picture_black_48dp.png')
+        source = require('./img/ic_photo_24dp_blue.png')
         text = albumText
         break
     }
@@ -591,8 +591,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   emptyContainer: {
-    flex: 1, 
-    alignItems:'center', 
+    flex: 1,
+    alignItems:'center',
     justifyContent:'center'
   },
   text: {
