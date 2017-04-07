@@ -22,13 +22,20 @@ type ImageObject = {
   height: number,
   width: number,
   mimeType: string,
-  type: string
+  type: string,
+  imageSource: string
 }
 
 const ErrorCode = {
   ErrorTooLarge: 'TooLarge',
   ErrorTooSmall: 'TooSmall',
   ErrorTooLong: 'TooLong'
+}
+
+const ImageSource = {
+  SourcePicker: 'Picker',
+  SourceAlbum: 'Album',
+  SourceCamera: 'Camera'
 }
 
 class CameraRollPicker extends Component {
@@ -43,7 +50,7 @@ class CameraRollPicker extends Component {
       noMore: false,
       dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
       permissionStatus: {
-        photo: 'undetermined', //one of: 'authorized', 'denied', 'restricted', or 'undetermined' 
+        photo: 'undetermined', //one of: 'authorized', 'denied', 'restricted', or 'undetermined'
         camera: 'undetermined'
       }
     }
@@ -194,13 +201,13 @@ class CameraRollPicker extends Component {
     )
   }
 
-  _renderEmpty () {    
+  _renderEmpty () {
     const {
       emptyText,
       emptyTextStyle,
       tintColor
     } = this.props
-    
+
     return (
       <Text style={[{color: tintColor}, styles.text, emptyTextStyle]}>
         { emptyText }
@@ -373,7 +380,7 @@ class CameraRollPicker extends Component {
 
     onPick(this.state.selected, image)
 
-    this._resizeImage(image.uri)
+    this._resizeImage(image.uri, ImageSource.SourcePicker)
   }
 
   _nEveryRow (data, n) {
@@ -440,7 +447,7 @@ class CameraRollPicker extends Component {
               )
             } else {
               ImagePicker.launchCamera({}, (response) => {
-                this._onPickerComplete(response)
+                this._onPickerComplete(response, ImageSource.SourceCamera)
               })
             }
           }).catch(e => console.warn(e))
@@ -448,7 +455,7 @@ class CameraRollPicker extends Component {
         break
       case 'Album': {
         ImagePicker.launchImageLibrary({}, (response) => {
-          this._onPickerComplete(response)
+          this._onPickerComplete(response, ImageSource.SourceAlbum)
         })
       }
         break
@@ -457,7 +464,7 @@ class CameraRollPicker extends Component {
     }
   }
 
-  _onPickerComplete (response) {
+  _onPickerComplete (response, imageSource) {
     var {onPick} = this.props
     // console.log('Response = ', response)
     if (response.didCancel) {
@@ -465,18 +472,19 @@ class CameraRollPicker extends Component {
     } else if (response.error) {
       console.log('ImagePicker Error: ', response.error)
     } else {
-      const image = this._getImageFromResponse(response)
+      const image = this._getImageFromResponse(response, imageSource)
       onPick(this.state.selected, image)
-      this._resizeImage(response.uri)
+      this._resizeImage(response.uri, imageSource)
     }
   }
 
-  _getImageFromResponse (response): ImageObject {
+  _getImageFromResponse (response, imageSource): ImageObject {
     var image = {}
     image['isStored'] = true
     image['width'] = response.width
     image['height'] = response.height
     image['filename'] = response.fileName
+    image['imageSource'] = imageSource
     // You can display the image using either:
     // source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
     // Or:
@@ -496,7 +504,7 @@ class CameraRollPicker extends Component {
     return image
   }
 
-  _resizeImage (uri) {
+  _resizeImage (uri: string, imageSource: string) {
     if (this.props.onResize === null) {
       return
     }
@@ -516,7 +524,7 @@ class CameraRollPicker extends Component {
         console.log('Resize Error: ', response.error)
         this.props.onResize(response.error, null)
       } else {
-        const image = this._getImageFromResponse(response)
+        const image = this._getImageFromResponse(response, imageSource)
         this._validateImageDimension(image)
           .then(result => {
             this.props.onResize(null, image)
@@ -591,8 +599,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   emptyContainer: {
-    flex: 1, 
-    alignItems:'center', 
+    flex: 1,
+    alignItems:'center',
     justifyContent:'center'
   },
   text: {
