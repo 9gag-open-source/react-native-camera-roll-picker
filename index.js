@@ -280,7 +280,7 @@ class CameraRollPicker extends Component {
         break
       default:
       case 'Album':
-        source = require('./img/ic_picture_black_48dp.png')
+        source = require('./img/ic_photo_24dp_blue.png')
         text = albumText
         break
     }
